@@ -1,0 +1,47 @@
+import cv2
+import numpy as np
+
+ix ,iy = -1,-1
+
+
+def draw_rectangle(event,x,y,flags, param):
+    if event == cv2.EVENT_LBUTTONUP:
+        global kol ,ix, iy,roi
+        print (ix)
+        img1 = cv2.rectangle(kol, (ix, iy), (x, y), (0, 255, 0), 3)
+        roi = img1[iy:y, ix:x]
+        cv2.imwrite('template.jpg',roi)
+
+    elif event == cv2.EVENT_LBUTTONDOWN:
+        global ix,iy
+        ix= x
+        iy= y
+        print (ix)
+
+kol = cv2.imread('zad2.jpg', 1)
+kol1 = cv2.imread('zad2.jpg', 1)
+img = cv2.imread('zad2.jpg', 0)
+cv2.namedWindow('image')
+cv2.setMouseCallback('image', draw_rectangle)
+
+
+temp1 = cv2.imread('template.jpg',0)
+w, h = temp1.shape[::-1]
+
+res = cv2.matchTemplate(img, temp1, cv2.TM_CCOEFF_NORMED)
+
+threshold = 0.9
+loc = np.where(res >= threshold)
+
+for pt in zip(*loc[::-1]):
+    cv2.rectangle(kol1, pt, (pt[0]+w, pt[1]+h), (255,0,0), 1)
+
+
+while (1):
+    cv2.imshow('image', kol)
+    cv2.imshow('image1', kol1)
+
+    if cv2.waitKey(20) & 0xFF == 27:
+        break
+
+cv2.destroyAllWindows()
